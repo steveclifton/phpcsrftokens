@@ -1,14 +1,9 @@
 <?php
 
-namespace SteveClifton;
+namespace steveclifton\phpcsrftokens;
 
 class Csrf
 {
-
-	public function __construct()
-	{
-
-	}
 
 	const EXPIRY = 1800;
 
