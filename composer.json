@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "steveclifton\\phpcsrftokens": "src/"
+            "steveclifton\\phpcsrftokens\\": "src/"
         }
     }
 }
