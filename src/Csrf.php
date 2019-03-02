@@ -5,7 +5,7 @@ namespace steveclifton\phpcsrftokens;
 class Csrf
 {
 
-	const EXPIRY = 1800; // 30 minutes
+	const EXPIRY    = 1800; // 30 minutes
 	const POST_NAME = 'csrftoken';
 
 
@@ -13,7 +13,7 @@ class Csrf
 	 * Generates a new token
 	 * @return [object]   token
 	 */
-	protected static function setNewToken($page) {
+	protected static function setNewToken(string $page) {
 
 		$token = new \stdClass();
 		$token->page = $page;
@@ -32,7 +32,7 @@ class Csrf
 	 * @param  [string]   page name
 	 * @return [object]   token
 	 */
-	protected static function getSessionToken($page) {
+	protected static function getSessionToken(string $page) {
 
 		$token = !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
 
@@ -50,7 +50,7 @@ class Csrf
 	 * @param  [string]   page name
 	 * @return [string]   token string / empty string
 	 */
-	protected static function getCookieToken($page) : string {
+	protected static function getCookieToken(string $page) : string {
 		$value = self::makeCookieName($page);
 
 		return !empty($_COOKIE[$value]) ? $_COOKIE[$value] : '';
@@ -62,7 +62,7 @@ class Csrf
 	 * @param  [string]   page name
 	 * @return [string]   cookie token name / empty string
 	 */
-	protected static function makeCookieName($page) : string {
+	protected static function makeCookieName(string $page) : string {
 
 		if (empty($page)) {
 			return '';
@@ -85,7 +85,7 @@ class Csrf
 	 * @param  [string]   page name
 	 * @return [string]   markup to be used in the form
 	 */
-	public static function getInputToken($page) {
+	public static function getInputToken(string $page) {
 
 		self::confirmSessionStarted();
 
@@ -106,7 +106,7 @@ class Csrf
 	 * @param  [string]    token from the request
 	 * @return [bool]      whether the request submission is valid or not
 	 */
-	public static function verifyToken($page, $removeToken = true, $requestToken = null) : bool {
+	public static function verifyToken(string $page, $removeToken = true, $requestToken = null) : bool {
 
 		self::confirmSessionStarted();
 
@@ -147,7 +147,7 @@ class Csrf
 	 * @param  [string] $page    page name
 	 * @return [bool]            successfully removed or not
 	 */
-	public static function removeToken($page) {
+	public static function removeToken(string $page) {
 
 		self::confirmSessionStarted();
 
