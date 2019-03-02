@@ -5,8 +5,9 @@ namespace steveclifton\phpcsrftokens;
 class Csrf
 {
 
-	const EXPIRY    = 1800; // 30 minutes
-	const POST_NAME = 'csrftoken';
+	const EXPIRY     = 1800; // 30 minutes
+	const POST_NAME  = 'csrftoken';
+	const HTTPS_ONLY = false;
 
 
 	/**
@@ -71,6 +72,10 @@ class Csrf
 		return 'csrftoken-' . substr(md5($page), 0, 10);
 	}
 
+	/**
+	 * Confirms that the superglobal $_SESSION exists
+	 * @return [bool]  Whether the session exists or not
+	 */
 	protected static function confirmSessionStarted() : bool {
 		if (empty($_SESSION)) {
 			trigger_error('Session has not been started.', E_USER_ERROR);
@@ -78,6 +83,15 @@ class Csrf
 		}
 
 		return true;
+	}
+
+	/**
+	 * Confirms whether the request was made using HTTPS
+	 * @return [bool]
+	 */
+	protected static function isHttps() : bool {
+
+		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
 	}
 
 	/**
@@ -106,9 +120,13 @@ class Csrf
 	 * @param  [string]    token from the request
 	 * @return [bool]      whether the request submission is valid or not
 	 */
-	public static function verifyToken(string $page, $removeToken = true, $requestToken = null) : bool {
+	public static function verifyToken(string $page, $removeToken = false, $requestToken = null) : bool {
 
 		self::confirmSessionStarted();
+
+		if (self::HTTPS_ONLY && empty(self::isHttps())) {
+			return false;
+		}
 
 		// if the request token has not been passed, check POST
 		$requestToken = $requestToken ?? $_POST[self::POST_NAME] ?? null;

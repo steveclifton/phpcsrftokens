@@ -22,6 +22,8 @@ $ composer require steveclifton/phpcsrftokens
 ## Usage
 For ease of use, all PHP Csrf Tokens methods have been made static to make generation and verification as simple as possible.
 
+Following the OWASP guidelines, the `verifyToken()` method *does not* reset the tokens after each request, enabling double submission of the form.
+
 Requires superglobal `$_SESSION` to be set.
 
 ```php
@@ -34,7 +36,7 @@ use steveclifton\phpcsrftokens\Csrf;
 session_start();
 
 if (!empty($_GET['a'])) {
-	echo '<pre>' .print_r($_POST, true) . '</pre>';
+	echo '<pre>' . print_r($_POST, true) . '</pre>';
 	echo 'Verification has been : ' . (Csrf::verifyToken('home') ? 'successful' : 'unsuccessful');
 }
 
