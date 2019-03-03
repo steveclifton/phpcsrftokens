@@ -37,7 +37,7 @@ class Csrf
 		$token = !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
 
 		// make sure the time is set, and is within the window
-		if (empty($token->expiry) || time() > $token->expiry) {
+		if (empty($token->expiry) || time() > (int) $token->expiry) {
 			return self::setNewToken($page);
 		}
 
@@ -130,8 +130,12 @@ class Csrf
 		// if the request token has not been passed, check POST
 		$requestToken = $requestToken ?? $_POST['csrftoken'] ?? null;
 
-		if (empty($page) || empty($requestToken)) {
+		if (empty($page)) {
 			trigger_error('Page alias is missing', E_USER_WARNING);
+			return false;
+		}
+		else if (empty($requestToken)) {
+			trigger_error('Token is missing', E_USER_WARNING);
 			return false;
 		}
 
