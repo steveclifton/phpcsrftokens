@@ -76,7 +76,10 @@ class Csrf
 	}
 
 	/**
-	 * Returns a page's token
+	 * Returns a page's token.
+	 * - Page name is required so that users can browse to multiple pages and allows for each
+	 *   page to have its own unique token
+	 *
 	 * @param  [string]   page name
 	 * @param  [int]      expiry time
 	 * @return [mixed]    markup to be used in the form, false on data missing
