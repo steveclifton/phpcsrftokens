@@ -76,7 +76,8 @@ class Csrf
 	 * @return [bool]  Whether the session exists or not
 	 */
 	protected static function confirmSessionStarted() : bool {
-		if (empty($_SESSION)) {
+
+		if (!isset($_SESSION)) {
 			trigger_error('Session has not been started.', E_USER_ERROR);
 			return false;
 		}
