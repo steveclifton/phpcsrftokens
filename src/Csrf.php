@@ -6,9 +6,6 @@ class Csrf
 {
 
 	const EXPIRY     = 1800; // 30 minutes
-	const HTTPS_ONLY = false;
-
-
 	/**
 	 * Generates a new token
 	 * @return [object]   token
@@ -86,15 +83,6 @@ class Csrf
 	}
 
 	/**
-	 * Confirms whether the request was made using HTTPS
-	 * @return [bool]
-	 */
-	protected static function isHttps() : bool {
-
-		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
-	}
-
-	/**
 	 * Returns a page's token
 	 * @param  [string]   page name
 	 * @return [string]   markup to be used in the form
@@ -123,10 +111,6 @@ class Csrf
 	public static function verifyToken(string $page, $removeToken = false, $requestToken = null) : bool {
 
 		self::confirmSessionStarted();
-
-		if (self::HTTPS_ONLY && empty(self::isHttps())) {
-			return false;
-		}
 
 		// if the request token has not been passed, check POST
 		$requestToken = $requestToken ?? $_POST['csrftoken'] ?? null;
