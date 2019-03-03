@@ -5,16 +5,15 @@ namespace steveclifton\phpcsrftokens;
 class Csrf
 {
 
-	const EXPIRY     = 1800; // 30 minutes
 	/**
 	 * Generates a new token
 	 * @return [object]   token
 	 */
-	protected static function setNewToken(string $page) {
+	protected static function setNewToken(string $page, int $expiry) {
 
 		$token = new \stdClass();
 		$token->page   = $page;
-		$token->expiry = time() + self::EXPIRY;
+		$token->expiry = time() + $expiry;
 		$token->sessiontoken  = base64_encode(random_bytes(32));
 		$token->cookietoken   = md5(base64_encode(random_bytes(32)));
 
@@ -31,14 +30,7 @@ class Csrf
 	 */
 	protected static function getSessionToken(string $page) {
 
-		$token = !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
-
-		// make sure the time is set, and is within the window
-		if (empty($token->expiry) || time() > (int) $token->expiry) {
-			return self::setNewToken($page);
-		}
-
-		return $token;
+		return !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
 	}
 
 
@@ -48,6 +40,7 @@ class Csrf
 	 * @return [string]   token string / empty string
 	 */
 	protected static function getCookieToken(string $page) : string {
+
 		$value = self::makeCookieName($page);
 
 		return !empty($_COOKIE[$value]) ? $_COOKIE[$value] : '';
@@ -85,9 +78,10 @@ class Csrf
 	/**
 	 * Returns a page's token
 	 * @param  [string]   page name
-	 * @return [string]   markup to be used in the form
+	 * @param  [int]      expiry time
+	 * @return [mixed]    markup to be used in the form, false on data missing
 	 */
-	public static function getInputToken(string $page) {
+	public static function getInputToken(string $page, int $expiry = 1800) {
 
 		self::confirmSessionStarted();
 
@@ -96,7 +90,7 @@ class Csrf
 			return false;
 		}
 
-		$token = self::getSessionToken($page);
+		$token = (self::getSessionToken($page) ?? self::setNewToken($page, $expiry));
 
 		return '<input type="hidden" id="csrftoken" name="csrftoken" value="'. $token->sessiontoken .'">';
 	}
@@ -113,7 +107,7 @@ class Csrf
 		self::confirmSessionStarted();
 
 		// if the request token has not been passed, check POST
-		$requestToken = $requestToken ?? $_POST['csrftoken'] ?? null;
+		$requestToken = ($requestToken ?? $_POST['csrftoken'] ?? null);
 
 		if (empty($page)) {
 			trigger_error('Page alias is missing', E_USER_WARNING);
@@ -127,7 +121,8 @@ class Csrf
 		$token = self::getSessionToken($page);
 
 		// if the time is greater than the expiry form submission window
-		if (time() > (int) $token->expiry) {
+		if (empty($token) || time() > (int) $token->expiry) {
+			self::removeToken($page);
 			return false;
 		}
 
@@ -140,6 +135,7 @@ class Csrf
 			self::removeToken($page);
 		}
 
+		// both session and cookie match
 		if ($sessionConfirm && $cookieConfirm) {
 			return true;
 		}
@@ -153,7 +149,7 @@ class Csrf
 	 * @param  [string] $page    page name
 	 * @return [bool]            successfully removed or not
 	 */
-	public static function removeToken(string $page) {
+	public static function removeToken(string $page) : bool {
 
 		self::confirmSessionStarted();
 
