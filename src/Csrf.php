@@ -6,7 +6,6 @@ class Csrf
 {
 
 	const EXPIRY     = 1800; // 30 minutes
-	const POST_NAME  = 'csrftoken';
 	const HTTPS_ONLY = false;
 
 
@@ -17,8 +16,8 @@ class Csrf
 	protected static function setNewToken(string $page) {
 
 		$token = new \stdClass();
-		$token->page = $page;
-		$token->expiry = time() + self::EXPIRY; // 30 minutes
+		$token->page   = $page;
+		$token->expiry = time() + self::EXPIRY;
 		$token->sessiontoken  = base64_encode(random_bytes(32));
 		$token->cookietoken   = md5(base64_encode(random_bytes(32)));
 
@@ -110,7 +109,7 @@ class Csrf
 
 		$token = self::getSessionToken($page);
 
-		return '<input type="hidden" id="csrftoken" name="'.self::POST_NAME.'" value="'. $token->sessiontoken .'">';
+		return '<input type="hidden" id="csrftoken" name="csrftoken" value="'. $token->sessiontoken .'">';
 	}
 
 
@@ -129,7 +128,7 @@ class Csrf
 		}
 
 		// if the request token has not been passed, check POST
-		$requestToken = $requestToken ?? $_POST[self::POST_NAME] ?? null;
+		$requestToken = $requestToken ?? $_POST['csrftoken'] ?? null;
 
 		if (empty($page) || empty($requestToken)) {
 			trigger_error('Page alias is missing', E_USER_WARNING);
