@@ -29,8 +29,15 @@ class Csrf
 	 * @return [object]   token
 	 */
 	protected static function getSessionToken(string $page) {
-
-		return !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
+    $token = !empty($_SESSION['csrftokens'][$page]) ? $_SESSION['csrftokens'][$page] : null;
+    if ($token) {
+      if (time() > (int) $token->expiry) {
+        self::removeToken($page);
+      } else {
+        return $token;
+      }
+    }
+		return null;
 	}
 
 
